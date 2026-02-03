@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQF Tower</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>🏢 SQF Tower</h1>
+      <div class="status">
+        <span class="status-dot online"></span>
+        <span>Live</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Building View -->
+      <div class="building">
+        <div class="floor floor-5" data-floor="5">
+          <div class="floor-label">Penthouse</div>
+          <div class="floor-content">
+            <div class="agent" data-agent="tom">
+              <div class="agent-avatar">👨‍💼</div>
+              <div class="agent-name">Tom</div>
+              <div class="agent-role">CEO</div>
+              <div class="thought-bubble hidden"></div>
+            </div>
+            <div class="floor-decoration desk"></div>
+          </div>
+        </div>
+
+        <div class="floor floor-4" data-floor="4">
+          <div class="floor-label">Floor 4</div>
+          <div class="floor-content">
+            <div class="agent working" data-agent="itombot">
+              <div class="agent-avatar">🤖</div>
+              <div class="agent-name">iTomBot</div>
+              <div class="agent-role">COO/CTO</div>
+              <div class="thought-bubble">Analyzing whale patterns...</div>
+            </div>
+            <div class="floor-decoration servers"></div>
+          </div>
+        </div>
+
+        <div class="floor floor-3" data-floor="3">
+          <div class="floor-label">Floor 3</div>
+          <div class="floor-content">
+            <div class="agent idle" data-agent="research">
+              <div class="agent-avatar">🔬</div>
+              <div class="agent-name">Rex</div>
+              <div class="agent-role">Research</div>
+              <div class="thought-bubble hidden"></div>
+            </div>
+            <div class="floor-decoration whiteboard"></div>
+          </div>
+        </div>
+
+        <div class="floor floor-2" data-floor="2">
+          <div class="floor-label">Floor 2</div>
+          <div class="floor-content">
+            <div class="agent idle" data-agent="marketing">
+              <div class="agent-avatar">📣</div>
+              <div class="agent-name">Mara</div>
+              <div class="agent-role">Marketing</div>
+              <div class="thought-bubble hidden"></div>
+            </div>
+            <div class="floor-decoration plants"></div>
+          </div>
+        </div>
+
+        <div class="floor floor-1" data-floor="1">
+          <div class="floor-label">Lobby</div>
+          <div class="floor-content">
+            <div class="agent idle" data-agent="support">
+              <div class="agent-avatar">🎧</div>
+              <div class="agent-name">Sam</div>
+              <div class="agent-role">Support</div>
+              <div class="thought-bubble hidden"></div>
+            </div>
+            <div class="floor-decoration reception"></div>
+          </div>
+        </div>
+
+        <!-- Elevator -->
+        <div class="elevator" id="elevator">
+          <div class="elevator-car">🛗</div>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="activity-panel">
+        <h2>Activity Feed</h2>
+        <div class="activity-feed" id="activityFeed">
+          <div class="activity-item">
+            <span class="activity-time">16:14</span>
+            <span class="activity-agent">🤖 iTomBot</span>
+            <span class="activity-text">Completed beachboy4 whale analysis</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-time">16:10</span>
+            <span class="activity-agent">🤖 iTomBot</span>
+            <span class="activity-text">Researching multi-instance OpenClaw</span>
+          </div>
+          <div class="activity-item meeting">
+            <span class="activity-time">16:05</span>
+            <span class="activity-agent">👨‍💼 Tom → 🤖 iTomBot</span>
+            <span class="activity-text">Discussed Docker isolation for Mac Mini</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-time">15:56</span>
+            <span class="activity-agent">🤖 iTomBot</span>
+            <span class="activity-text">Drafted X post on memory architecture</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Agent Detail Modal -->
+    <div class="modal hidden" id="agentModal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="modal-header">
+          <span class="modal-avatar" id="modalAvatar">🤖</span>
+          <div>
+            <h3 id="modalName">iTomBot</h3>
+            <p id="modalRole">COO/CTO</p>
+          </div>
+        </div>
+        <div class="modal-body">
+          <h4>Current Task</h4>
+          <p id="modalTask">Analyzing Polymarket whale patterns</p>
+          <h4>Recent Memory</h4>
+          <ul id="modalMemory">
+            <li>Completed beachboy4 analysis</li>
+            <li>Drafted memory architecture post</li>
+            <li>Researched multi-instance Docker setup</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

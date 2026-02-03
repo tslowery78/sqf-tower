@@ -180,6 +180,84 @@ app.post('/status', (req, res) => {
   res.json({ ok: true });
 });
 
+// Send message to OpenClaw and get response
+app.post('/send', async (req, res) => {
+  const { message } = req.body;
+  
+  if (!message) {
+    return res.status(400).json({ error: 'Missing message' });
+  }
+  
+  console.log(`Chat message: "${message}"`);
+  
+  // Update iTomBot to working state
+  processEvent({
+    type: 'thinking',
+    agent: 'itombot',
+    data: { thought: 'Processing: ' + message.slice(0, 30) + '...' }
+  });
+  
+  try {
+    // Route to OpenClaw via sessions_send or gateway API
+    // For now, use the sessions API endpoint
+    const { exec } = require('child_process');
+    
+    const response = await new Promise((resolve, reject) => {
+      // Escape the message for shell
+      const escapedMessage = message.replace(/'/g, "'\"'\"'");
+      
+      exec(`openclaw sessions send --message '${escapedMessage}' --timeout 120`, 
+        { timeout: 130000 },
+        (error, stdout, stderr) => {
+          if (error) {
+            console.error('OpenClaw error:', error.message);
+            // Try to extract any response even on error
+            if (stdout) {
+              resolve(stdout.trim());
+            } else {
+              reject(error);
+            }
+          } else {
+            resolve(stdout.trim());
+          }
+        }
+      );
+    });
+    
+    // Clear thought
+    processEvent({
+      type: 'thinking',
+      agent: 'itombot',
+      data: { thought: null }
+    });
+    
+    // Add to activity
+    processEvent({
+      type: 'action',
+      agent: 'itombot',
+      data: { action: `Chat: "${message.slice(0, 40)}${message.length > 40 ? '...' : ''}"` }
+    });
+    
+    res.json({ response: response || 'Message received', ok: true });
+    
+  } catch (err) {
+    console.error('Failed to send to OpenClaw:', err);
+    
+    processEvent({
+      type: 'thinking',
+      agent: 'itombot',
+      data: { thought: null }
+    });
+    
+    // Fallback: echo response for testing
+    res.json({ 
+      response: `[Tower Test Mode] Received: "${message}"`, 
+      ok: true,
+      test: true
+    });
+  }
+});
+
 // Start HTTP server
 app.listen(HTTP_PORT, () => {
   console.log(`Tower Bridge HTTP server running on http://localhost:${HTTP_PORT}`);
@@ -190,6 +268,7 @@ app.listen(HTTP_PORT, () => {
   console.log('  GET  /state   - Current agent state');
   console.log('  POST /event   - Send single event');
   console.log('  POST /status  - Batch status update (for heartbeat)');
+  console.log('  POST /send    - Send chat message to OpenClaw');
   console.log('');
   console.log('Test with:');
   console.log(`  curl -X POST http://localhost:${HTTP_PORT}/event \\`);

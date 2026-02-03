@@ -310,3 +310,105 @@ document.addEventListener('keydown', (e) => {
     closeModal();
   }
 });
+
+// Chat Interface
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+const chatMessages = document.getElementById('chatMessages');
+
+let isWaitingForResponse = false;
+
+function addChatMessage(text, type, agentName = null) {
+  // Remove welcome message if present
+  const welcome = chatMessages.querySelector('.chat-welcome');
+  if (welcome) welcome.remove();
+  
+  const msg = document.createElement('div');
+  msg.className = `chat-message ${type}`;
+  
+  if (agentName) {
+    msg.innerHTML = `<div class="agent-tag">${agentName}</div>${text}`;
+  } else {
+    msg.textContent = text;
+  }
+  
+  chatMessages.appendChild(msg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  
+  return msg;
+}
+
+function showTypingIndicator() {
+  const indicator = document.createElement('div');
+  indicator.className = 'chat-message agent typing';
+  indicator.id = 'typingIndicator';
+  indicator.innerHTML = '<div class="agent-tag">🤖 iTomBot</div>Thinking';
+  chatMessages.appendChild(indicator);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const indicator = document.getElementById('typingIndicator');
+  if (indicator) indicator.remove();
+}
+
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text || isWaitingForResponse) return;
+  
+  // Add user message
+  addChatMessage(text, 'user');
+  chatInput.value = '';
+  
+  // Update iTomBot to working state
+  updateAgentThought('itombot', 'Processing message...');
+  
+  // Show typing indicator
+  isWaitingForResponse = true;
+  chatSend.disabled = true;
+  showTypingIndicator();
+  
+  try {
+    // Send to bridge
+    const response = await fetch(`${BRIDGE_HTTP_URL}/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+    
+    removeTypingIndicator();
+    
+    if (response.ok) {
+      const data = await response.json();
+      
+      // Move elevator to user floor (lobby) then back up
+      showMeetingAnimation('itombot', 'support');
+      
+      setTimeout(() => {
+        addChatMessage(data.response || data.message || 'Response received', 'agent', '🤖 iTomBot');
+        showMeetingAnimation('support', 'itombot');
+      }, 600);
+      
+      // Add to activity feed
+      addActivityToFeed('itombot', `Responded to chat: "${text.slice(0, 30)}${text.length > 30 ? '...' : ''}"`, false);
+    } else {
+      addChatMessage('Failed to get response. Bridge may be offline.', 'agent', '⚠️ System');
+    }
+  } catch (err) {
+    removeTypingIndicator();
+    console.error('Chat error:', err);
+    addChatMessage('Could not reach the tower. Bridge offline.', 'agent', '⚠️ System');
+  }
+  
+  // Reset state
+  updateAgentThought('itombot', null);
+  isWaitingForResponse = false;
+  chatSend.disabled = false;
+  chatInput.focus();
+}
+
+// Event listeners
+chatSend.addEventListener('click', sendMessage);
+chatInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
